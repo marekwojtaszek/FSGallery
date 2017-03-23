@@ -1,159 +1,159 @@
-/**
- * gallery.js
- */
+(() => {
+  'use strict'
 
-(function() {
-    "use strict";
+  const body = document.body
+  const cssStyles = {
+    container: {
+      'height': '100%',
+      'width': '100%',
+      'position': 'absolute',
+      'top': '0',
+      'left': '0',
+      'background': '#000',
+      'text-align': 'center',
+      'z-index': '100000'
+    },
+    status: {
+      'width': '80px',
+      'position': 'absolute',
+      'top': '0',
+      'right': '0',
+      'padding': '6px 0',
+      'color': '#fff',
+      'background': '#000',
+      'text-align': 'center',
+      'z-index': '1000000'
+    },
+    slide: {
+      'height': '100%',
+      'width': '100%',
+      'display': 'none',
+      'background-position': 'center center',
+      'background-repeat': 'no-repeat',
+      'background-size': 'contain'
+    }
+  }
 
-    var body  = document.body;
-    var index = 0;
-    var wrapper;
-    var status;
-    var slides;
-    var slidesCount;
-    var i,j;
+  const closest = (el) => el && (el.id.length > 0 ? el : closest(el.parentNode))
 
-    function updateStatus (index) {
-        status.innerText = parseInt(index + 1, 10) + ' / ' + slidesCount;
+  const addCssStyles = (cssStyles) => {
+    const style = document.createElement('style')
+    style.appendChild(document.createTextNode(''))    // WebKit hack
+    document.head.appendChild(style)
+
+    Object.keys(cssStyles).forEach((el) => {
+      style.sheet.insertRule(`.fs-gallery-${el}
+        ${JSON.stringify(cssStyles[el])
+              .replace(/\"/gi,'')
+              .replace(/\,/gi,';')}`, 0)
+    })
+  }
+
+  const renderDiv = (className, container) => {
+    const el = document.createElement('div')
+    el.classList.add(`fs-gallery-${className}`)
+
+    if (container) container.appendChild(el)
+
+    return el
+  }
+
+  const renderSlides = (className, container, images) => {
+    const slides = []
+    let slide
+
+    images.forEach((image, i) => {
+      image.style.opacity = 0
+      slide = renderDiv(className, container)
+      slide.style.backgroundImage = 'url(' + image.src + ')',
+      slide.appendChild(image)
+      slides[i] = slide
+    })
+
+    slides[0].style.display = 'block'   // show first image
+
+    return slides
+  }
+
+  class Gallery {
+    constructor(images) {
+      this._container = renderDiv('container')
+      this._status    = renderDiv('status', this._container)
+      this._slides    = renderSlides('slide', this._container, images)
+      this._index     = 0
+      this._updateStatus(this._index)   // set initial status
+
+      this.showNextSlide = this._showNextSlide.bind(this)
+      this.showPrevSlide = this._showPrevSlide.bind(this)
     }
 
-    function showNextSlide () {
-        if (index < slidesCount - 1) {
-            slides[index].style.display   = 'none';
-            slides[++index].style.display = 'block';
-            updateStatus(index);
+    get HTML() {
+      return this._container
+    }
+
+    _updateStatus(index) {
+      this._status.innerText = parseInt(index + 1, 10) + ' / ' + this._slides.length
+    }
+
+    _showNextSlide() {
+      if (this._index < this._slides.length - 1) {
+        this._slides[this._index].style.display   = 'none'
+        this._slides[++this._index].style.display = 'block'
+        this._updateStatus(this._index)
+      }
+    }
+
+    _showPrevSlide() {
+      if (this._index > 0) {
+        this._slides[this._index].style.display   = 'none'
+        this._slides[--this._index].style.display = 'block'
+        this._updateStatus(this._index)
+      }
+    }
+  }
+
+  function generateGallery (e) {
+    if (e.target.tagName === 'IMG' && e.target !== e.currentTarget) {
+      const images = document.querySelectorAll('#' + closest(e.target.parentNode).id + ' img')
+      const gallery = new Gallery(images)
+
+      document.documentElement.style.height = '100%'  // apply styles for HTML element
+      body.style.height  = '100%'                     // apply styles for body element
+      body.style.padding = '0'                        // apply styles for body element
+      body.innerHTML = ''                             // reset page content
+      body.appendChild(gallery.HTML)
+
+      addCssStyles(cssStyles)
+
+      document.removeEventListener('click', generateGallery)     // remove listener for click for gallery generation
+
+      document.addEventListener('click', gallery.showNextSlide, false)   // add listener for click for next slide
+      document.addEventListener('keypress', (e) => {
+        const key = e.which
+        const keys = {
+          '0'   : gallery.showNextSlide,  // spacebar
+          '32'  : gallery.showNextSlide,  // spacebar
+          '108' : gallery.showNextSlide,  // 'l' key
+          '107' : gallery.showPrevSlide   // 'k' key
         }
+
+        if (typeof keys[key] !== 'function') return
+        else keys[key]()
+      }, false)     // add listener for keypress for prev / next slide
     }
 
-    function showPrevSlide () {
-        if (index > 0) {
-            slides[index].style.display   = 'none';
-            slides[--index].style.display = 'block';
-            updateStatus(index);
-        }
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  function activateClickListener () {
+    if (!document.processed) {
+      document.processed = true      // allow gallery to be processed just once
+      document.addEventListener('click', generateGallery, false)
     }
+  }
 
-    function closest (el) {
-        return el && (el.id.length > 0 ? el : closest(el.parentNode));
-    }
+  document.processed = document.processed || false
 
-    function generateGallery (event) {
-        if (event.target.tagName === 'IMG' && event.target !== event.currentTarget) {
-            var images = document.querySelectorAll('#' + closest(event.target.parentNode).id + ' img');
-
-            document.documentElement.style.height = '100%';  // apply styles for HTML element
-            body.style.height  = '100%';                     // apply styles for body element
-            body.style.padding = '0';                        // apply styles for body element
-
-            body.innerHTML = '';
-
-            wrapper = renderWrapper();
-            status  = renderStatus();
-            slides  = renderSlides(images, wrapper);
-            slidesCount = slides.length;
-
-            updateStatus(index);   // set initial status
-
-            document.removeEventListener('click', generateGallery);     // remove listener for click for gallery generation
-
-            document.addEventListener('click', showNextSlide, false);   // add listener for click for next slide
-            document.addEventListener('keypress', keypress, false);     // add listener for keypress for prev / next slide
-        }
-
-        event.preventDefault();
-        event.stopPropagation();
-    }
-
-    function renderWrapper () {
-        var wrapper = document.createElement('div');
-        wrapper.style.height     = '100%';
-        wrapper.style.width      = '100%';
-        wrapper.style.position   = 'absolute';
-        wrapper.style.top        = '0';
-        wrapper.style.left       = '0';
-        wrapper.style.zIndex     = '100000';
-        wrapper.style.background = '#000';
-        wrapper.style.textAlign  = 'center';
-
-        body.appendChild(wrapper);
-
-        return wrapper;
-    }
-
-    function renderStatus () {
-        var status = document.createElement('div');
-        status.style.width      = '80px';
-        status.style.position   = 'absolute';
-        status.style.top        = '0';
-        status.style.right      = '0';
-        status.style.zIndex     = '1000000';
-        status.style.color      = '#fff';
-        status.style.background = 'rgba(0,0,0,0.6)';
-        status.style.textAlign  = 'center';
-        status.style.padding    = '6px 0';
-
-        body.appendChild(status);
-
-        return status;
-    }
-
-    function renderImage(src) {
-        var img = document.createElement('img');
-        img.src = src;
-        img.style.opacity = 0;
-
-        return img;
-    }
-
-    function renderSlides (images, wrapper) {
-        var slides = [];
-        var el;
-
-        for (i = 0, j = images.length; i < j; i++) {
-            el = document.createElement('div');
-            el.style.height             = '100%';
-            el.style.width              = '100%';
-            el.style.display            = 'none';
-            el.style.backgroundImage    = 'url(' + images[i].src + ')';
-            el.style.backgroundPosition = 'center center';
-            el.style.backgroundRepeat   = 'no-repeat';
-            el.style.backgroundSize     = 'contain';
-            el.appendChild(renderImage(images[i].src));
-            slides[i] = el;             // replace current image with image block
-
-            wrapper.appendChild(el);
-        }
-
-        slides[0].style.display = 'block';  // show first image
-
-        return slides;
-    }
-
-    function activateClickListener () {
-        if (!document.processed) {
-            document.processed = true;      // allow gallery to be processed just once
-            document.addEventListener('click', generateGallery, false);
-        }
-    }
-
-    function keypress (event) {
-        var key = event.which;
-
-        if (typeof keys[key] !== 'function') {
-            return;
-        } else {
-            keys[key]();
-        }
-    }
-
-    var keys = {
-        '0'   : showNextSlide,  // spacebar
-        '32'  : showNextSlide,  // spacebar
-        '108' : showNextSlide,  // 'l' key
-        '107' : showPrevSlide   // 'k' key
-    };
-
-    document.processed = document.processed || false;
-
-    activateClickListener();
-})();
+  activateClickListener()
+})()
