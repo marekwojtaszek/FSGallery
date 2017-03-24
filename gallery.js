@@ -87,7 +87,7 @@
       this.showPrevSlide = this._showPrevSlide.bind(this)
     }
 
-    get HTML() {
+    get html() {
       return this._container
     }
 
@@ -117,17 +117,17 @@
       const images = document.querySelectorAll('#' + closest(e.target.parentNode).id + ' img')
       const gallery = new Gallery(images)
 
-      document.documentElement.style.height = '100%'  // apply styles for HTML element
-      body.style.height  = '100%'                     // apply styles for body element
-      body.style.padding = '0'                        // apply styles for body element
-      body.innerHTML = ''                             // reset page content
-      body.appendChild(gallery.HTML)
+      document.documentElement.style.height = '100%'
+      body.style.height  = '100%'
+      body.style.padding = '0'
+      body.innerHTML = ''     // reset page content
+      body.appendChild(gallery.html)
 
       addCssStyles(cssStyles)
 
-      document.removeEventListener('click', generateGallery)     // remove listener for click for gallery generation
+      document.removeEventListener('click', generateGallery)
 
-      document.addEventListener('click', gallery.showNextSlide, false)   // add listener for click for next slide
+      document.addEventListener('click', gallery.showNextSlide, false)
       document.addEventListener('keypress', (e) => {
         const key = e.which
         const keys = {
@@ -139,7 +139,7 @@
 
         if (typeof keys[key] !== 'function') return
         else keys[key]()
-      }, false)     // add listener for keypress for prev / next slide
+      }, false)
     }
 
     e.preventDefault()
