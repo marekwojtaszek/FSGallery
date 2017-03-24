@@ -75,6 +75,18 @@
     return slides
   }
 
+  const keyActions = (gallery) => ({which}) => {
+    const keys = {
+      '0'   : gallery.showNextSlide,  // spacebar
+      '32'  : gallery.showNextSlide,  // spacebar
+      '108' : gallery.showNextSlide,  // 'l' key
+      '107' : gallery.showPrevSlide   // 'k' key
+    }
+
+    if (typeof keys[which] !== 'function') return
+    else keys[which]()
+  }
+
   class Gallery {
     constructor(images) {
       this._container = renderDiv('container')
@@ -127,17 +139,7 @@
       document.removeEventListener('click', generateGallery)
 
       document.addEventListener('click', gallery.showNextSlide, false)
-      document.addEventListener('keypress', ({which}) => {
-        const keys = {
-          '0'   : gallery.showNextSlide,  // spacebar
-          '32'  : gallery.showNextSlide,  // spacebar
-          '108' : gallery.showNextSlide,  // 'l' key
-          '107' : gallery.showPrevSlide   // 'k' key
-        }
-
-        if (typeof keys[which] !== 'function') return
-        else keys[which]()
-      }, false)
+      document.addEventListener('keypress', keyActions(gallery), false)
     }
 
     e.preventDefault()
