@@ -114,12 +114,11 @@
 
   function generateGallery (e) {
     if (e.target.tagName === 'IMG' && e.target !== e.currentTarget) {
-      const images = document.querySelectorAll('#' + closest(e.target.parentNode).id + ' img')
+      const images = document.querySelectorAll(`#${closest(e.target.parentNode).id} img`)
       const gallery = new Gallery(images)
 
       document.documentElement.style.height = '100%'
-      body.style.height  = '100%'
-      body.style.padding = '0'
+      Object.assign(body.style, { height: '100%', padding: 0 })
       body.innerHTML = ''     // reset page content
       body.appendChild(gallery.html)
 
@@ -128,8 +127,7 @@
       document.removeEventListener('click', generateGallery)
 
       document.addEventListener('click', gallery.showNextSlide, false)
-      document.addEventListener('keypress', (e) => {
-        const key = e.which
+      document.addEventListener('keypress', ({which}) => {
         const keys = {
           '0'   : gallery.showNextSlide,  // spacebar
           '32'  : gallery.showNextSlide,  // spacebar
@@ -137,8 +135,8 @@
           '107' : gallery.showPrevSlide   // 'k' key
         }
 
-        if (typeof keys[key] !== 'function') return
-        else keys[key]()
+        if (typeof keys[which] !== 'function') return
+        else keys[which]()
       }, false)
     }
 
