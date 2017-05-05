@@ -9,6 +9,7 @@
       'position': 'absolute',
       'top': '0',
       'left': '0',
+      'color': '#fff',
       'background': '#000',
       'text-align': 'center',
       'z-index': '100000'
@@ -19,7 +20,6 @@
       'top': '0',
       'right': '0',
       'padding': '6px 0',
-      'color': '#fff',
       'background': '#000',
       'text-align': 'center',
       'z-index': '1000000'
@@ -31,6 +31,9 @@
       'background-position': 'center center',
       'background-repeat': 'no-repeat',
       'background-size': 'contain'
+    },
+    autoplay: {
+      'color': '#00c0ff'
     }
   }
 
@@ -79,6 +82,7 @@
     const keys = {
       '0'   : gallery.showNextSlide,  // spacebar
       '32'  : gallery.showNextSlide,  // spacebar
+      '112' : gallery.autoplay,       // 'p' key
       '108' : gallery.showNextSlide,  // 'l' key
       '107' : gallery.showPrevSlide   // 'k' key
     }
@@ -93,10 +97,12 @@
       this._status    = renderDiv('status', this._container)
       this._slides    = renderSlides('slide', this._container, images)
       this._index     = 0
+      this._interval  = null
       this._updateStatus(this._index)   // set initial status
 
       this.showNextSlide = this._showNextSlide.bind(this)
       this.showPrevSlide = this._showPrevSlide.bind(this)
+      this.autoplay      = this._autoplay.bind(this)
     }
 
     get html() {
@@ -120,6 +126,16 @@
         this._slides[this._index].style.display   = 'none'
         this._slides[--this._index].style.display = 'block'
         this._updateStatus(this._index)
+      }
+    }
+
+    _autoplay() {
+      if(this._interval) {
+        this._status.classList.remove('fs-gallery-autoplay')
+        window.clearInterval(this._interval)
+      } else {
+        this._status.classList.add('fs-gallery-autoplay')
+        this._interval = setInterval(this.showNextSlide, 4000)
       }
     }
   }
