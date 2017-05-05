@@ -12,7 +12,8 @@
       'color': '#fff',
       'background': '#000',
       'text-align': 'center',
-      'z-index': '100000'
+      'z-index': '100000',
+      'overflow': 'hidden'
     },
     status: {
       'width': '80px',
