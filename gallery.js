@@ -133,7 +133,7 @@
     _autoplay() {
       if(this._interval) {
         this._status.classList.remove('fs-gallery-autoplay')
-        window.clearInterval(this._interval)
+        this._interval = window.clearInterval(this._interval)
       } else {
         this._status.classList.add('fs-gallery-autoplay')
         this._interval = setInterval(this.showNextSlide, 4000)
